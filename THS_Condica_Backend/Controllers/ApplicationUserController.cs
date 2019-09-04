@@ -40,10 +40,11 @@ namespace THS_Condica_Backend.Controllers
         [HttpPost]
         [Authorize(Roles ="Admin")]
         [Route("Register")]
+        //register with admin only user roles
         public async Task<Object> Register(RegisterModel model)
         {
             model.Role = "User";
-
+            //create a new ApplicationUser object and add values from model
             var applicationUser = new ApplicationUser()
             {
                 UserName = model.UserName,
@@ -56,11 +57,11 @@ namespace THS_Condica_Backend.Controllers
                 PassChanged = false
             };
             try
-            {
+            {   //generate random pass for user
                 var randomPass = GenerateRandomPassword();
                 var result = await _userManager.CreateAsync(applicationUser, randomPass);
                 await _userManager.AddToRoleAsync(applicationUser, model.Role);
-
+                //send credentials via email
                 await SendEmailAsync(applicationUser.FirstName,applicationUser.Email, applicationUser.UserName, randomPass);
                 
                 return Ok(result);
@@ -75,7 +76,7 @@ namespace THS_Condica_Backend.Controllers
         [Authorize(Roles = "Admin")]
         [Route("userlist")]
         public async Task<List<UserModel>> ListUsers()
-        {
+        {   //send a list of all users with user roles
             var users =await _userManager.GetUsersInRoleAsync("user");
             List<UserModel> userList = new List<UserModel>();
             foreach(var user in users)
@@ -90,7 +91,8 @@ namespace THS_Condica_Backend.Controllers
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login(LoginModel model)
-        {
+        {   
+
             var user = await _userManager.FindByNameAsync(model.UserName);
             if(user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
