@@ -26,7 +26,6 @@ namespace THS_Condica_Backend.Controllers
         {
             _context = context;
             _userManager = userManager;
-
         }
 
         //ADMIN
@@ -54,14 +53,11 @@ namespace THS_Condica_Backend.Controllers
                 checkIn = checkIn.Where(x => x.UserName.Equals(userName));
 
             }
-
             //if empty gets present year
             if (string.IsNullOrEmpty(startDate))
             {
                 startDate = DateTime.Now.ToString();
-            }
-           
-
+            }        
             if (string.IsNullOrEmpty(endDate))
             {
                 endDate = DateTime.Now.ToString();
@@ -77,7 +73,6 @@ namespace THS_Condica_Backend.Controllers
         [HttpGet("adtotalmonth")]
         public JObject TotalMonthlyCheckIn(string userName, string startDate, string endDate)
         {
-
             var checkIn = Condica(userName, startDate, endDate);
 
             var firstCheckin = checkIn.Select(p => TimeSpan.Parse(p.FirstEntry));
@@ -88,7 +83,6 @@ namespace THS_Condica_Backend.Controllers
             {
                 firstTotal += timeSpan;
             }
-
             TimeSpan secondTotal = TimeSpan.Zero;
             foreach (TimeSpan timeSpan in secondCheckin)
             {
@@ -124,9 +118,7 @@ namespace THS_Condica_Backend.Controllers
 
             }
 
-           
-                var year = DateTime.Now.Year.ToString();
-            
+            var year = DateTime.Now.Year.ToString();
 
             var selectedYear = checkIn.Where(c => c.Day.Year == Int32.Parse(year));
 
@@ -151,12 +143,11 @@ namespace THS_Condica_Backend.Controllers
             json.Add("mHours", finalValue);
 
             return json;
-
         }
 
         [HttpPost]
         [Route("adduserentry")]
-        public async Task<ActionResult<CheckInModel>> PostCheckInModel(CheckInDTO model)
+        public async Task<ActionResult<CheckInModel>> AdPostCheckInModel(CheckInDTO model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
             string userId = user.Id;
@@ -170,11 +161,64 @@ namespace THS_Condica_Backend.Controllers
 
             };
 
-           
             _context.CheckIn.Add(checkIn);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCheckInModel", new { id = checkIn.ID }, checkIn);
+        }
+
+        [HttpPut]
+        [Route("adupdateentry")]
+        public async Task<IActionResult> AdPutCheckInModel([FromBody] CheckInDTO model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            string userId = user.Id;
+
+            var checkIn = new CheckInModel
+            {
+                ID = model.ID,
+                Day = model.Day,
+                FirstEntry = model.FirstEntry,
+                SecondEntry = model.SecondEntry,
+                OwnerId = userId
+
+            };
+            
+            _context.Entry(checkIn).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CheckInModelExists(model.ID))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return NoContent();
+        }
+
+        // DELETE: api/CheckIn/5
+        [HttpDelete]
+        [Route("addeleteentry/{id}")]
+        public async Task<ActionResult<CheckInModel>> AdDeleteCheckInModel(int id)
+        {
+            var checkInModel = await _context.CheckIn.FindAsync(id);
+            if (checkInModel == null)
+            {
+                return NotFound();
+            }
+
+            _context.CheckIn.Remove(checkInModel);
+            await _context.SaveChangesAsync();
+
+            return checkInModel;
         }
 
         //USERS
@@ -185,7 +229,6 @@ namespace THS_Condica_Backend.Controllers
         {
             var checkin = GetCheckIn(year, month);
 
-
             var firstCheckin = checkin.Select(p => TimeSpan.Parse(p.FirstEntry));
             var secondCheckin = checkin.Select(p => TimeSpan.Parse(p.SecondEntry));
 
@@ -194,7 +237,6 @@ namespace THS_Condica_Backend.Controllers
             {
                 firstTotal += timeSpan;
             }
-
             TimeSpan secondTotal = TimeSpan.Zero;
             foreach (TimeSpan timeSpan in secondCheckin)
             {
@@ -207,7 +249,6 @@ namespace THS_Condica_Backend.Controllers
             json.Add("mHours", finalValue);
 
             return json;
-
         }
 
         // return total worked hours in this year
@@ -230,7 +271,6 @@ namespace THS_Condica_Backend.Controllers
             {
                 firstTotal += timeSpan;
             }
-
             TimeSpan secondTotal = TimeSpan.Zero;
             foreach (TimeSpan timeSpan in secondCheckin)
             {
@@ -243,7 +283,6 @@ namespace THS_Condica_Backend.Controllers
             json.Add("mHours", finalValue);
 
             return json;
-
         }
 
         // GET: api/CheckIn
@@ -272,22 +311,19 @@ namespace THS_Condica_Backend.Controllers
             {
                 month = TransformMonth(month).ToString();
             }
-
             //if month string is all query only the year
             if(month.Equals("All"))
             {
                 checkin = checkin.Where(c => c.Day.Year == Int32.Parse(year))
-                                    .OrderByDescending(o => o.Day);
+                                 .OrderByDescending(o => o.Day);
             }
             //if month string is legit query year and month
             else
             {
                 checkin = checkin.Where(c => c.Day.Year == Int32.Parse(year) && c.Day.Month == Int32.Parse(month))
-                                   .OrderByDescending(o => o.Day);
+                                 .OrderByDescending(o => o.Day);
             }
            
-
-
             return checkin; //returns only the sepcific user values
         }
         public int TransformMonth(string month)
@@ -310,9 +346,7 @@ namespace THS_Condica_Backend.Controllers
             {
                 return months.IndexOf(month) +1;
             }
-
             return DateTime.Now.Month;
-
         }
 
         // GET: api/CheckIn/5
@@ -325,30 +359,22 @@ namespace THS_Condica_Backend.Controllers
             {
                 return NotFound();
             }
-
             return checkInModel;
         }
 
-      
         // GET: api/CheckIn/todayEntry
         [HttpGet]
         [Route("todayEntry")]
         public async Task<ActionResult<CheckInModel>> GetTodayEntry()
         {
             string userId = User.Claims.First(c => c.Type == "UserID").Value;
-
-         
             var id = _context.CheckIn.First(u => u.OwnerId == userId && u.Day == DateTime.Today).ID;
-                                        
-
-          
             var checkInModel = await _context.CheckIn.FindAsync(id);
 
             if (checkInModel == null)
             {
                 return NotFound();
             }
-
             return checkInModel;
         }
 
@@ -359,7 +385,7 @@ namespace THS_Condica_Backend.Controllers
         {
             string userId = User.Claims.First(c => c.Type == "UserID").Value;
             var id = _context.CheckIn.Where(u => u.OwnerId == userId)
-                                        .FirstOrDefault(i => i.Day == DateTime.Today).ID;
+                                     .FirstOrDefault(i => i.Day == DateTime.Today).ID;
 
             if (id != checkInModel.ID)
             {
@@ -386,7 +412,6 @@ namespace THS_Condica_Backend.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
@@ -397,8 +422,6 @@ namespace THS_Condica_Backend.Controllers
         {
             string userId = User.Claims.First(c => c.Type == "UserID").Value;
 
-            
-            
             checkInModel.OwnerId = userId;
             checkInModel.Day = DateTime.Today;
             checkInModel.SecondEntry = checkInModel.FirstEntry;

@@ -71,6 +71,31 @@ namespace THS_Condica_Backend.Controllers
                 throw ex;
             }
         }
+        [HttpDelete]
+        [Authorize(Roles = "Admin")]
+        [Route("deleteuser/{userName}")]
+        public async Task<IActionResult> AdDeleteUser(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            
+            if(user == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var result = await _userManager.DeleteAsync(user);
+
+                if(result.Succeeded)
+                {
+                    return Ok(result);
+                }
+            }
+            return null;
+
+
+        }
+
 
         [HttpGet]
         [Authorize(Roles = "Admin")]

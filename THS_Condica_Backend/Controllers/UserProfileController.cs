@@ -37,10 +37,7 @@ namespace THS_Condica_Backend.Controllers
                 user.PassChanged,
                 user.UserName,
                 user.Email
-
             };
-
-
         }
 
         [HttpPut]
@@ -88,7 +85,6 @@ namespace THS_Condica_Backend.Controllers
                 emailChanged = true;
             }
 
-
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
@@ -97,17 +93,7 @@ namespace THS_Condica_Backend.Controllers
                 return new ApiResponse
                 {
                     ErrorMessage = result.Errors.ToString()
-                };
-            //await _context.SaveChangesAsync();
-            //return new
-            //{
-            //    user.FirstName,
-            //    user.LastName,
-            //    user.Department,
-            //    user.Position,
-            //    user.UserName
-
-            //};
+                };         
 
         }
         [HttpPut]
@@ -128,19 +114,7 @@ namespace THS_Condica_Backend.Controllers
             {
                 return BadRequest(new { message = "Wrong password" });
             }
-           
-           
-                
-
-            //if (result.Succeeded)
-            //    return new ApiResponse();
-            //else
-            //    return new ApiResponse
-            //    {
-            //        ErrorMessage = result.Errors.ToString()
-            //    };
 
         }
-
     }
 }
