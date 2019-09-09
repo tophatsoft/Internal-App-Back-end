@@ -20,9 +20,9 @@ namespace THS_Condica_Backend.Controllers
         public UserProfileController(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
-          
         }
 
+        //returns the passchanged value to verify if it was changed or not, used to alert user to change it
         [HttpGet]
         [Authorize]
         [Route("firstLoggin")]
@@ -40,6 +40,7 @@ namespace THS_Condica_Backend.Controllers
             };
         }
 
+        //user can update profile
         [HttpPut]
         [Authorize]
         //PUT: /api/UserProfile
@@ -94,8 +95,9 @@ namespace THS_Condica_Backend.Controllers
                 {
                     ErrorMessage = result.Errors.ToString()
                 };         
-
         }
+
+        //user can change password
         [HttpPut]
         [Route("changePass")]
         public async Task<Object> UpdateUserPassword([FromBody] UpdateUserPasswordModel model)

@@ -29,7 +29,7 @@ namespace THS_Condica_Backend.Controllers
         }
 
         //ADMIN
-
+        //gets all users entries by  user and date
         [HttpGet]
         [Authorize(Roles = "Admin")]
         [Route("adcondica")]
@@ -69,6 +69,7 @@ namespace THS_Condica_Backend.Controllers
             
             return checkIn;
         }
+        //returns month hours on a specific period
         [Authorize(Roles = "Admin")]
         [HttpGet("adtotalmonth")]
         public JObject TotalMonthlyCheckIn(string userName, string startDate, string endDate)
@@ -97,6 +98,7 @@ namespace THS_Condica_Backend.Controllers
             return json;
 
         }
+        //returns current year hours
         [Authorize(Roles = "Admin")]
         [HttpGet("adtotalyear")]
         public JObject AdTotalYearlyCheckIn([FromQuery]string userName)
@@ -144,7 +146,7 @@ namespace THS_Condica_Backend.Controllers
 
             return json;
         }
-
+        //add a user checkin with all fields
         [HttpPost]
         [Route("adduserentry")]
         public async Task<ActionResult<CheckInModel>> AdPostCheckInModel(CheckInDTO model)
@@ -166,7 +168,7 @@ namespace THS_Condica_Backend.Controllers
 
             return CreatedAtAction("GetCheckInModel", new { id = checkIn.ID }, checkIn);
         }
-
+        //edit a specific checkin
         [HttpPut]
         [Route("adupdateentry")]
         public async Task<IActionResult> AdPutCheckInModel([FromBody] CheckInDTO model)
@@ -204,7 +206,7 @@ namespace THS_Condica_Backend.Controllers
             return NoContent();
         }
 
-        // DELETE: api/CheckIn/5
+        //delete a specific checkin
         [HttpDelete]
         [Route("addeleteentry/{id}")]
         public async Task<ActionResult<CheckInModel>> AdDeleteCheckInModel(int id)
