@@ -111,7 +111,6 @@ namespace THS_Condica_Backend.Controllers
                 var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
                
                 return Ok(result);
-
             }else
             {
                 return BadRequest(new { message = "Wrong password" });
